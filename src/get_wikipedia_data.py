@@ -1,8 +1,4 @@
 import wikipedia
-import warnings
-
-# Silence BeautifulSoup parser warnings from wikipedia library
-warnings.filterwarnings("ignore", category=UserWarning, module="wikipedia")
 
 
 def get_wikipedia_links(topic: str) -> list[str]:
@@ -11,6 +7,8 @@ def get_wikipedia_links(topic: str) -> list[str]:
         page = wikipedia.page(topic, auto_suggest=False)
         return page.links
     except wikipedia.exceptions.PageError:
+        print(f"Error: '{topic}' not found on Wikipedia")
         return []
-    except wikipedia.exceptions.DisambiguationError as e:
+    except wikipedia.exceptions.DisambiguationError:
+        print(f"Disambiguation Error: Multiple pages found for '{topic}'")
         return []
