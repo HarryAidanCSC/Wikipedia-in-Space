@@ -8,5 +8,6 @@ dependencies = [
     "huggingface-hub>=1.4.1",
     "python-dotenv>=1.2.1",
     "sentence-transformers>=5.2.2",
+    "thefuzz>=0.22.1",
     "wikipedia>=1.4.0",
 ]
