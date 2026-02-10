@@ -40,17 +40,31 @@ class SpiderVerse:
             self.blacklist.add(self.cur_term)
             return False
 
+        # Perform linear search if the term exists logically
+        for term in top_terms:
+            if self._do_strings_match(term, self.target_term):
+                print(f"  → \033[96m{term}\033[0m \033[90m(100.0%)\033[0m")
+                self.cur_term = term
+                return True
+
         most_relevant_terms = find_best_matches(
             model=self.model, target=self.target_term, candidates=top_terms, top_n=top_n
         )
 
+        # Find the first valid, unvisited candidate that actually exists on Wikipedia
         term, prob = "", 0
-        for i, (candidate, candidate_prob) in enumerate(most_relevant_terms):
+        for candidate, candidate_prob in most_relevant_terms:
             if candidate not in self.visited and candidate not in self.blacklist:
-                term, prob = candidate, candidate_prob
-                break
+                # Validate that the page exists before committing to it
+                validation_links = get_wikipedia_links(topic=candidate)
+                if len(validation_links) > 0:
+                    term, prob = candidate, candidate_prob
+                    break
+                else:
+                    # Page doesn't exist, blacklist it and try next candidate
+                    self.blacklist.add(candidate)
 
-        # If all terms are visited/blacklisted, we're stuck - signal failure
+        # If all terms are visited/blacklisted, we're stuck
         if term == "":
             self.blacklist.add(self.cur_term)
             return False
@@ -116,5 +130,5 @@ class SpiderVerse:
         print(f"\033[90m{'─' * 50}\033[0m\n")
 
 
-spider_verse = SpiderVerse(start_term="Kier Starmer", target_term="Family Guy")
-spider_verse.enter_the_spiderverse(max_iterations=50)
+spider_verse = SpiderVerse(start_term="Kier Starmer", target_term="Bristol")
+spider_verse.enter_the_spiderverse(max_iterations=25)
